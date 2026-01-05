@@ -12,5 +12,5 @@ variable "region" {
 variable "bucket_name" {
   description = "The unique name for your Data Lake bucket"
   type        = string
-  default     = "ecommerce-datalake-demo-12345" 
+  default     = "synthetic-ecommerce-bucket" 
 }
