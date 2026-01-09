@@ -55,3 +55,20 @@ resource "google_bigquery_table" "events" {
     schema = file("../schemas/bq_schema.json")
   }
 }
+
+# Quarantine Layer (Dead Letter Queue Bucket)
+resource "google_storage_bucket" "quarantine" {
+  name          = "${var.bucket_name}-quarantine"
+  location      = var.region
+  force_destroy = true
+
+  # Auto-delete bad files after 14 days
+  lifecycle_rule {
+    condition {
+      age = 14
+    }
+    action {
+      type = "Delete"
+    }
+  }
+}
