@@ -22,10 +22,21 @@ class DataProducer:
 
     def generate_event(self):
         """Creates a single synthetic e-commerce event."""
-        # 1. Randomly decide what kind of event this is
+        # Introduce poison data with a small probability
+        if random.random() < 0.01:
+            print("😈 Generating POISON data!")
+            return {
+                "event_id": self.__faker.uuid4(),
+                # Missing 'timestamp' will cause datetime.fromtimestamp to fail
+                # Missing 'user_id' might break BigQuery schema
+                "event_type": "poison_pill", 
+                "bad_field": "This will crash the consumer" 
+            }
+        
+        # Randomly decide what kind of event this is
         event_type = random.choice(['view_product', 'add_to_cart', 'click_ad', 'purchase'])
         
-        # 2. Build the event payload
+        # Build the event payload
         event_data = {
             "event_id": self.__faker.uuid4(),
             "user_id": self.__faker.random_int(min=1000, max=100000),
@@ -39,7 +50,7 @@ class DataProducer:
             "browser": self.__faker.user_agent()
         }
 
-        # 3. Add context-specific fields
+        # Add context-specific fields
         if event_type == 'purchase':
             # Purchases have revenue and transaction IDs
             event_data["revenue"] = round(random.uniform(10.0, 500.0), 2)
