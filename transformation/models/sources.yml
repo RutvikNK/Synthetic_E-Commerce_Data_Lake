@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: ecommerce
+    database: synthetic-ecommerce
+    schema: ecommerce_analytics
+    tables:
+      - name: raw_events
