@@ -60,6 +60,18 @@
     "description": "The country location derived from the user's IP"
   },
   {
+    "name": "device",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The device on which this event was generated"
+  },
+  {
+    "name": "browser",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The browser used by the user"
+  },
+  {
     "name": "transaction_id",
     "type": "STRING",
     "mode": "NULLABLE",
