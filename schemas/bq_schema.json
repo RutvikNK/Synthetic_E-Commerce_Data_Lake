@@ -54,6 +54,12 @@
     "description": "The state or region derived from the user's IP"
   },
   {
+    "name": "country",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The country location derived from the user's IP"
+  },
+  {
     "name": "transaction_id",
     "type": "STRING",
     "mode": "NULLABLE",
