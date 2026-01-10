@@ -7,4 +7,4 @@ transformation:
       project: synthetic-ecommerce
       dataset: ecommerce_analytics
       threads: 1
-      location: US
+      location: us-central1
