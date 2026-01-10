@@ -1,0 +1,10 @@
+transformation:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: synthetic-ecommerce
+      dataset: ecommerce_analytics
+      threads: 1
+      location: us-central1
