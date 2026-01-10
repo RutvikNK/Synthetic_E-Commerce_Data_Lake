@@ -1,0 +1,31 @@
+[0m16:35:13.301273 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x107de76b0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1093c1220>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1093c0f20>]}
+
+
+============================== 16:35:13.304840 | 43c5fa9e-e115-4b47-abea-1b51a0b4593d ==============================
+[0m16:35:13.304840 [info ] [MainThread]: Running with dbt=1.11.2
+[0m16:35:13.305222 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'indirect_selection': 'eager', 'log_format': 'default', 'warn_error': 'None', 'write_json': 'True', 'cache_selected_only': 'False', 'debug': 'False', 'target_path': 'None', 'empty': 'None', 'no_print': 'None', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'quiet': 'False', 'static_parser': 'True', 'use_colors': 'True', 'log_path': 'logs', 'profiles_dir': '/Users/ruts/.dbt', 'version_check': 'True', 'log_cache_events': 'False', 'invocation_command': 'dbt init transformation', 'use_experimental_parser': 'False', 'fail_fast': 'False', 'introspect': 'True'}
+[0m16:35:13.344168 [info ] [MainThread]: Creating dbt configuration folder at /Users/ruts/.dbt
+[0m16:35:13.345752 [debug] [MainThread]: Starter project path: /Users/ruts/.local/share/uv/tools/dbt-core/lib/python3.12/site-packages/dbt/include/starter_project
+[0m16:35:13.349877 [info ] [MainThread]: 
+Your new dbt project "transformation" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m16:35:13.350131 [info ] [MainThread]: Setting up your profile.
+[0m16:36:09.089204 [info ] [MainThread]: Profile transformation written to /Users/ruts/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m16:36:09.113857 [debug] [MainThread]: Resource report: {"command_name": "init", "command_success": true, "command_wall_clock_time": 55.861935, "process_in_blocks": "0", "process_kernel_time": 0.955806, "process_mem_max_rss": "370753536", "process_out_blocks": "0", "process_user_time": 2.721686}
+[0m16:36:09.114399 [debug] [MainThread]: Command `dbt init` succeeded at 16:36:09.114337 after 55.86 seconds
+[0m16:36:09.114620 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x1093c1070>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x109279880>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x11b945100>]}
+[0m16:36:09.114851 [debug] [MainThread]: Flushing usage events
+[0m16:36:09.512700 [debug] [MainThread]: An error was encountered while trying to flush usage events
