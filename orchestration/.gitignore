@@ -1,0 +1,18 @@
+# Airflow Database (Local State)
+airflow.db
+airflow.db-journal
+
+# Logs (Runtime data)
+logs/
+
+# Auto-generated Configs & Secrets
+airflow.cfg
+webserver_config.py
+simple_auth_manager_passwords.json.generated
+
+# PID Files (Process locks)
+*.pid
+
+# Cache
+__pycache__/
+*.pyc
