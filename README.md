@@ -2,19 +2,42 @@
 
 A complete end-to-end data engineering platform that generates synthetic e-commerce traffic, ingests it into a serverless Data Lake, and performs daily ELT transformations using Modern Data Stack tools.
 
+## 📋 Table of Contents
+
+1. [Architecture](#-architecture)
+2. [Tech Stack](#-tech-stack)
+3. [Getting Started](#-getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Infrastructure Setup](#2-infrastructure-setup-terraform)
+    - [Deployment](#3-deploy-ingestion-function)
+4. [Running the Pipeline](#-running-the-pipeline)
+    - [Data Generation](#step-1-start-the-data-generator)
+    - [Transformation (dbt)](#step-2-configure-dbt-transformation)
+    - [Orchestration (Airflow)](#step-3-start-airflow-orchestration)
+5. [Testing & Quality Assurance](#-testing--quality-assurance)
+6. [Cleanup](#-cleanup)
+7. [Project Structure](#-project-structure)
+
 ## 🏗 Architecture
 
-**Event-Driven Pipeline:**
+The platform follows a modern **ELT (Extract, Load, Transform)** pattern, decoupled into three stages: Ingestion, Storage, and Transformation.
+
+**High-Level Data Flow:**
 `Python Producer` ➔ `Google Pub/Sub` ➔ `Cloud Functions` ➔ `GCS (Data Lake)` ➔ `BigQuery` ➔ `dbt` ➔ `Looker Studio`
 
-**Key Components:**
-* **Ingestion:** Streaming ingestion using **Google Pub/Sub** and **Cloud Functions (Gen 2)**.
-* **Storage:** Raw JSON logs stored in **Google Cloud Storage (GCS)**, partitioned by date (`year=YYYY/month=MM/day=DD`).
-* **Transformation:** **dbt (data build tool)** models to clean, type-cast, and aggregate raw data into analytical Fact tables.
-* **Orchestration:** **Apache Airflow** DAGs to schedule and monitor the daily transformation pipelines.
-* **Resilience:** Implemented **Dead Letter Queue (DLQ)** pattern to automatically quarantine malformed JSON data without stopping the ingestion pipeline.
-* **IaC:** Full infrastructure provisioning using **Terraform**.
+### Component Breakdown
 
+| Stage | Component | Description |
+| :--- | :--- | :--- |
+| **Source** | **Python Producer** | Acts as the "user traffic" simulator. It generates realistic fake JSON events (order completed, page viewed, ad clicked, etc) and publishes them to the topic. It also intentionally introduces "poison pill" (malformed) records 1% of the time to test system resilience. |
+| **Buffer** | **Google Pub/Sub** | Serves as the ingestion buffer. It decouples the high-speed producer from the downstream consumers, allowing the system to handle traffic spikes without crashing. |
+| **Ingestion** | **Cloud Functions (Gen 2)** | A serverless Python function triggered by every message in Pub/Sub. It parses the JSON, validates the schema, and routes the data. Valid data goes to the Data Lake; invalid data goes to the Dead Letter Queue. |
+| **Storage** | **Google Cloud Storage (GCS)** | The **Raw Data Lake**. JSON files are stored here as immutable objects, partitioned by ingestion time (`year=YYYY/month=MM/day=DD`) for efficient querying. |
+| **Resilience** | **Quarantine Bucket (DLQ)** | The **Dead Letter Queue**. If the Ingestion function fails to parse a record (e.g., missing timestamp), it saves the raw payload here for manual inspection instead of crashing the pipeline. |
+| **Warehouse** | **BigQuery** | The serverless Data Warehouse. It sits on top of GCS and treats the raw JSON files as **External Tables**, allowing the querying of files using standard SQL without moving data. |
+| **Transform** | **dbt (Data Build Tool)** | The transformation engine. It executes SQL jobs inside BigQuery to convert raw data into polished **Fact** and **Dimension** tables (e.g., `fct_daily_sales`). It handles testing, documentation, and lineage. |
+| **Orchestrate**| **Apache Airflow** | The workflow manager. It runs on a daily schedule to trigger the dbt models, ensuring that reports are updated only after fresh data has arrived. |
+| **Visualize** | **Looker Studio** | (Optional) Connects to the final BigQuery Fact tables to visualize metrics like "Daily Revenue" and "Top Selling Products". |
 ## 🛠 Tech Stack
 
 * **Language:** Python 3.12
