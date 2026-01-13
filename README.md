@@ -22,6 +22,8 @@ A complete end-to-end data engineering platform that generates synthetic e-comme
 
 The platform follows a modern **ELT (Extract, Load, Transform)** pattern, decoupled into three stages: Ingestion, Storage, and Transformation.
 
+![Architecture Diagram](./assets/synthetic_ecomm_diagram.jpg)
+
 **High-Level Data Flow:**
 `Python Producer` ➔ `Google Pub/Sub` ➔ `Cloud Functions` ➔ `GCS (Data Lake)` ➔ `BigQuery` ➔ `dbt` ➔ `Looker Studio`
 
