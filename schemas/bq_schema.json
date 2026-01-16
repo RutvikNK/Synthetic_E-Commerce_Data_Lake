@@ -2,79 +2,73 @@
   {
     "name": "event_id",
     "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "Unique identifier for the specific event instance"
-  },
-  {
-    "name": "user_id",
-    "type": "INTEGER",
-    "mode": "REQUIRED",
-    "description": "Unique identifier for the user performing the action"
-  },
-  {
-    "name": "timestamp",
-    "type": "FLOAT",
-    "mode": "REQUIRED",
-    "description": "Unix timestamp of when the event occurred"
+    "mode": "NULLABLE",
+    "description": "Unique UUID for the event"
   },
   {
     "name": "event_type",
     "type": "STRING",
-    "mode": "REQUIRED",
-    "description": "The type of interaction (e.g., view_product, add_to_cart, purchase)"
+    "mode": "NULLABLE",
+    "description": "Type of interaction: ad_click, page_view, add_to_cart, purchase"
   },
   {
-    "name": "product_id",
+    "name": "user_id",
     "type": "STRING",
     "mode": "NULLABLE",
-    "description": "Unique identifier for the product involved in the event"
+    "description": "Unique identifier for the user session"
   },
   {
-    "name": "revenue",
-    "type": "FLOAT",
+    "name": "timestamp",
+    "type": "TIMESTAMP",
     "mode": "NULLABLE",
-    "description": "Total revenue generated if the event is a purchase"
-  },
-  {
-    "name": "ip_address",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The IP address of the user's device"
-  },
-  {
-    "name": "city",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The city location derived from the user's IP"
-  },
-  {
-    "name": "state",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The state or region derived from the user's IP"
-  },
-  {
-    "name": "country",
-    "type": "STRING",
-    "mode": "NULLABLE",
-    "description": "The country location derived from the user's IP"
+    "description": "UTC timestamp of the event"
   },
   {
     "name": "device",
     "type": "STRING",
     "mode": "NULLABLE",
-    "description": "The device on which this event was generated"
+    "description": "User device: mobile, desktop, tablet"
   },
   {
-    "name": "browser",
+    "name": "location",
     "type": "STRING",
     "mode": "NULLABLE",
-    "description": "The browser used by the user"
+    "description": "User country code (US, UK, DE, etc.)"
   },
   {
-    "name": "transaction_id",
+    "name": "product_id",
     "type": "STRING",
     "mode": "NULLABLE",
-    "description": "Unique identifier for the financial transaction (purchase only)"
+    "description": "Product SKU (only for browse/cart/purchase)"
+  },
+  {
+    "name": "product_name",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Name of the product"
+  },
+  {
+    "name": "category",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Product category (Audio, Kitchen, etc.)"
+  },
+  {
+    "name": "price",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Price of the product"
+  },
+  {
+    "name": "ad_source",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Source of the ad click (google, facebook, etc.)"
+  },
+  {
+    "name": "campaign_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Marketing campaign ID"
   }
 ]
