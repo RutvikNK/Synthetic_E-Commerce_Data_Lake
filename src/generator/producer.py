@@ -75,7 +75,6 @@ class DataProducer:
         user_id = str(uuid.uuid4())
         selected_product = random.choice(PRODUCTS)
         
-        # 3. Determine the User's Intent (Funnel Depth)
         # Weights define how likely a user is to convert.
         # 0: Ad Click Only (Bounce)
         # 1: View Only (Window Shopper)
