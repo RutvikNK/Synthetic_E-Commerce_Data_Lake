@@ -12,6 +12,14 @@ provider "google" {
   region  = var.region
 }
 
+locals {
+  event_types = toset(["ad_click", "page_view", "add_to_cart", "purchase"])
+}
+
+resource "random_id" "bucket_suffix" {
+  byte_length = 4
+}
+
 # The Ingestion Layer (Pub/Sub)
 resource "google_pubsub_topic" "events_topic" {
   name = "ecommerce-events"
@@ -35,24 +43,38 @@ resource "google_bigquery_dataset" "analytics" {
   default_table_expiration_ms = null
 }
 
+resource "google_storage_bucket_object" "placeholder" {
+  for_each = local.event_types
+  
+  # Note the path: event_type=X / year=2000
+  name    = "event_type=${each.key}/year=2000/month=01/day=01/init.json"
+  content = "{\"status\": \"initialized\"}"
+  bucket  = google_storage_bucket.data_lake.name
+}
+
 # The "External Table"
-resource "google_bigquery_table" "events" {
-  dataset_id          = google_bigquery_dataset.analytics.dataset_id
-  table_id            = "raw_events"
+resource "google_bigquery_table" "event_tables" {
+  for_each   = local.event_types
+  dataset_id = google_bigquery_dataset.analytics.dataset_id
+  table_id   = "raw_${each.key}"
+  
   deletion_protection = false
 
-  # Points to GCS bucket
+  depends_on = [google_storage_bucket_object.placeholder]
+  schema     = file("../schemas/bq_schema.json")
+
   external_data_configuration {
     autodetect    = false
     source_format = "NEWLINE_DELIMITED_JSON"
     
-    # Pattern for Cloud Function to use for file names
-    source_uris = [
-      "gs://${google_storage_bucket.data_lake.name}/events/*.json"
-    ]
-
-    # Point to schema file
-    schema = file("../schemas/bq_schema.json")
+    # Point ONLY to the specific event_type folder
+    source_uris   = ["gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}/*"]
+    
+    hive_partitioning_options {
+      mode              = "AUTO"
+      # BigQuery treats this prefix as the "Root", and scans for partitions under it
+      source_uri_prefix = "gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}"
+    }
   }
 }
 
