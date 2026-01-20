@@ -35,7 +35,7 @@ class DataProducer:
     def generate_event(self, user_id, event_type, product=None, referrer=None):
         """Creates a single event payload."""
         event_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
+        timestamp = datetime.now().isoformat()
         
         payload = {
             "event_id": event_id,
