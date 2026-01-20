@@ -67,10 +67,9 @@ resource "google_bigquery_table" "event_tables" {
   external_data_configuration {
     autodetect    = false 
     source_format = "NEWLINE_DELIMITED_JSON"
-    source_uris   = ["gs://${google_storage_bucket.event_buckets[each.key].name}/*"]
     
     # Point ONLY to the specific event_type folder
-    source_uris   = ["gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}/*"]
+    source_uris = ["gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}/*"]
     
     hive_partitioning_options {
       mode              = "AUTO"
