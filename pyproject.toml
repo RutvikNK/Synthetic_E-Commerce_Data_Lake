@@ -10,6 +10,7 @@ dependencies = [
     "google-cloud-pubsub>=2.34.0",
     "google-cloud-storage>=3.7.0",
     "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
     "python-dotenv>=1.2.1",
 ]
 
