@@ -1,6 +1,5 @@
 import pytest
 from unittest.mock import MagicMock, patch, ANY
-# Adjust this import path if your file is named differently
 from src.generator.producer import DataProducer, PRODUCTS
 
 @pytest.fixture
