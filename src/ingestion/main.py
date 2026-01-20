@@ -5,74 +5,45 @@ from datetime import datetime
 from google.cloud import storage
 import functions_framework
 
-# Initialize the Google Cloud Storage client
 storage_client = storage.Client()
 
-# Get Bucket Name from Environment Variable
+# Simpler Config: Just one main bucket
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
-QUARANTINE_BUCKET = os.environ.get("QUARANTINE_BUCKET") 
+QUARANTINE_BUCKET = os.environ.get("QUARANTINE_BUCKET")
 
 @functions_framework.cloud_event
 def ingest_event(cloud_event):
-    """
-    Triggered from a message on a Cloud Pub/Sub topic.
-    1. Decodes the message.
-    2. Parses the timestamp.
-    3. Saves to GCS in a partitioned folder structure.
-    """
     try:
-        # Pub/Sub sends data wrapped in base64
         pubsub_message = base64.b64decode(cloud_event.data["message"]["data"]).decode("utf-8")
         event_data = json.loads(pubsub_message)
         
-        # Use the event's timestamp if it exists, otherwise use 'now'
-        timestamp = event_data.get("timestamp")
-        if not timestamp:
-            raise ValueError("Missing 'timestamp' in event data")
+        event_type = event_data.get("event_type")
+        timestamp_str = event_data.get("timestamp")
+        event_id = event_data.get("event_id", "unknown")
 
-        # Create the Hive-style partition path
-        # Example: "year=2024/month=01/day=15"
-        dt = datetime.fromtimestamp(timestamp)
-        partition_path = (
-            f"year={dt.year}/"
-            f"month={dt.month:02d}/"
-            f"day={dt.day:02d}"
-        )
+        if not timestamp_str or not event_type:
+            raise ValueError("Missing 'timestamp' or 'event_type'")
 
-        # Save the event data to GCS
+        # Parse Time
+        dt = datetime.fromisoformat(timestamp_str)
+        
+        # Construct Hive-Style Path
+        # gs://bucket/event_type=purchase/year=2026/month=01/day=19/file.json
+        partition_path = f"event_type={event_type}/year={dt.year}/month={dt.month:02d}/day={dt.day:02d}"
+        blob_name = f"{partition_path}/{event_id}.json"
+        
+        # 3. Save
         bucket = storage_client.bucket(BUCKET_NAME)
+        blob = bucket.blob(blob_name)
+        blob.upload_from_string(json.dumps(event_data), content_type="application/json")
         
-        # Filename: events/{partition}/event_{uuid}.json
-        file_name = f"events/{partition_path}/event_{event_data.get('event_id')}.json"
-        
-        blob = bucket.blob(file_name)
-        blob.upload_from_string(
-            data=json.dumps(event_data),
-            content_type="application/json"
-        )
-        
-        print(f"✅ Saved {file_name}")
+        print(f"✅ Saved to {BUCKET_NAME}/{blob_name}")
 
-    except ValueError as e:
-        print(f"⚠️ Error processing event: {e}")
-        
-        # Move to Quarantine Bucket
+    except Exception as e:
+        print(f"❌ Error: {e}")
         if QUARANTINE_BUCKET:
-            try:
-                q_bucket = storage_client.bucket(QUARANTINE_BUCKET)
-                # Use current time for partition since we don't trust the event data
-                now = datetime.utcnow()
-                q_filename = f"failed/{now.year}/{now.month:02d}/{now.day:02d}/error_{now.timestamp()}.json"
-                
-                # We save the raw bad data + the error message
-                failure_payload = {
-                    "error": str(e),
-                    "original_data": event_data if 'event_data' in locals() else "Could not parse JSON"
-                }
-                
-                q_blob = q_bucket.blob(q_filename)
-                q_blob.upload_from_string(json.dumps(failure_payload), content_type="application/json")
-                print(f"run_quarantine: Sent to {QUARANTINE_BUCKET}/{q_filename}")
-                
-            except Exception as inner_e:
-                print(f"🔥 CRITICAL: Could not write to quarantine: {inner_e}")
+            bucket = storage_client.bucket(QUARANTINE_BUCKET)
+            now = datetime.now()
+            q_path = f"failed/year={now.year}/month={now.month:02d}/day={now.day:02d}"
+            blob = bucket.blob(f"{q_path}/{datetime.now().timestamp()}_error.json")
+            blob.upload_from_string(json.dumps({"error": str(e), "payload": str(pubsub_message)}))
