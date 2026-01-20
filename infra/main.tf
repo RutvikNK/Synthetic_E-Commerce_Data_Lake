@@ -44,33 +44,38 @@ resource "google_bigquery_dataset" "analytics" {
   default_table_expiration_ms = null
 }
 
-# Placeholder resource that hold partion structure
 resource "google_storage_bucket_object" "placeholder" {
   for_each = local.event_types
   
-  # Create a fake historical partition so BigQuery recognizes the structure
-  name    = "year=2000/month=01/day=01/init.json"
+  # Note the path: event_type=X / year=2000
+  name    = "event_type=${each.key}/year=2000/month=01/day=01/init.json"
   content = "{\"status\": \"initialized\"}"
-  bucket  = google_storage_bucket.event_buckets[each.key].name
+  bucket  = google_storage_bucket.data_lake.name
 }
 
 # The "External Table"
 resource "google_bigquery_table" "event_tables" {
   for_each   = local.event_types
   dataset_id = google_bigquery_dataset.analytics.dataset_id
-  table_id   = "raw_${each.key}"  # e.g., raw_purchase
+  table_id   = "raw_${each.key}"
   
+  deletion_protection = false
+
   depends_on = [google_storage_bucket_object.placeholder]
-  schema = file("../schemas/bq_schema.json")
+  schema     = file("../schemas/bq_schema.json")
 
   external_data_configuration {
     autodetect    = false 
     source_format = "NEWLINE_DELIMITED_JSON"
     source_uris   = ["gs://${google_storage_bucket.event_buckets[each.key].name}/*"]
     
+    # Point ONLY to the specific event_type folder
+    source_uris   = ["gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}/*"]
+    
     hive_partitioning_options {
-      mode                     = "AUTO"
-      source_uri_prefix        = "gs://${google_storage_bucket.event_buckets[each.key].name}"
+      mode              = "AUTO"
+      # BigQuery treats this prefix as the "Root", and scans for partitions under it
+      source_uri_prefix = "gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}"
     }
   }
 }
