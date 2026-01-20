@@ -12,6 +12,7 @@ provider "google" {
   region  = var.region
 }
 
+# Event types
 locals {
   event_types = toset(["ad_click", "page_view", "add_to_cart", "purchase"])
 }
@@ -26,11 +27,11 @@ resource "google_pubsub_topic" "events_topic" {
 }
 
 # The Storage Layer (Data Lake)
-resource "google_storage_bucket" "data_lake" {
-  name          = var.bucket_name
-  location      = var.region
-  force_destroy = true # Allows deleting bucket even if it has files (for learning only)
-
+resource "google_storage_bucket" "event_buckets" {
+  for_each                    = local.event_types
+  name                        = "ecommerce-${each.key}-${random_id.bucket_suffix.hex}"
+  location                    = var.region
+  force_destroy               = true
   uniform_bucket_level_access = true
 }
 
@@ -64,8 +65,9 @@ resource "google_bigquery_table" "event_tables" {
   schema     = file("../schemas/bq_schema.json")
 
   external_data_configuration {
-    autodetect    = false
+    autodetect    = false 
     source_format = "NEWLINE_DELIMITED_JSON"
+    source_uris   = ["gs://${google_storage_bucket.event_buckets[each.key].name}/*"]
     
     # Point ONLY to the specific event_type folder
     source_uris   = ["gs://${google_storage_bucket.data_lake.name}/event_type=${each.key}/*"]
@@ -80,7 +82,7 @@ resource "google_bigquery_table" "event_tables" {
 
 # Quarantine Layer (Dead Letter Queue Bucket)
 resource "google_storage_bucket" "quarantine" {
-  name          = "${var.bucket_name}-quarantine"
+  name          = "ecommerce-quarantine-${random_id.bucket_suffix.hex}"
   location      = var.region
   force_destroy = true
 
