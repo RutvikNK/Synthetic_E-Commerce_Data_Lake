@@ -53,3 +53,7 @@ __pycache__/
 .venv/
 .env
 dist/
+
+# Airflow Logs (These get huge!)
+orchestration/logs/
+*.log

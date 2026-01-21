@@ -1,6 +1,8 @@
 # Airflow Database (Local State)
 airflow.db
 airflow.db-journal
+airflow.db-shm
+airflow.db-wal
 
 # Logs (Runtime data)
 logs/
