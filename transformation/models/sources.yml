@@ -5,4 +5,7 @@ sources:
     database: synthetic-ecommerce
     schema: ecommerce_analytics
     tables:
-      - name: raw_events
+      - name: raw_page_view
+      - name: raw_add_to_cart
+      - name: raw_purchase
+      - name: raw_ad_click
