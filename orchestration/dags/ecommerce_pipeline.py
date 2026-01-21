@@ -1,11 +1,13 @@
-import os
+import pathlib
 
 from airflow import DAG
 from airflow.providers.standard.operators.bash import BashOperator
 from datetime import datetime, timedelta
 
-# If you need to set specific paths for dbt (optional but good for stability)
-DBT_PROJECT_DIR = os.getenv("DBT_PROJECT_DIR", "/opt/airflow/transformation")
+# Define paths
+DAGS_FOLDER = pathlib.Path(__file__).parent
+PROJECT_ROOT = DAGS_FOLDER.parent.parent
+DBT_PROJECT_DIR = str(PROJECT_ROOT / "transformation")
 
 default_args = {
     'owner': 'airflow',
