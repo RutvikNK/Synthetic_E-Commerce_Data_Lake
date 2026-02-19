@@ -13,6 +13,7 @@ QUARANTINE_BUCKET = os.environ.get("QUARANTINE_BUCKET")
 
 @functions_framework.cloud_event
 def ingest_event(cloud_event):
+    pubsub_message = None
     try:
         pubsub_message = base64.b64decode(cloud_event.data["message"]["data"]).decode("utf-8")
         event_data = json.loads(pubsub_message)
@@ -46,4 +47,5 @@ def ingest_event(cloud_event):
             now = datetime.now()
             q_path = f"failed/year={now.year}/month={now.month:02d}/day={now.day:02d}"
             blob = bucket.blob(f"{q_path}/{datetime.now().timestamp()}_error.json")
-            blob.upload_from_string(json.dumps({"error": str(e), "payload": str(pubsub_message)}))
+            payload_str = str(pubsub_message) if pubsub_message is not None else "Unknown payload"
+            blob.upload_from_string(json.dumps({"error": str(e), "payload": payload_str}))

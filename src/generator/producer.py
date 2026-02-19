@@ -76,7 +76,6 @@ class DataProducer:
         """
         Generates a logical sequence of events for a user across multiple sessions.
         """
-        import datetime as dt
         user_id = str(uuid.uuid4())
         events_to_publish = []
         
