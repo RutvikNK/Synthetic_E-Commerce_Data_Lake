@@ -24,3 +24,13 @@ dev = [
 members = [
     "orchestration",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+[tool.pyright]
+extraPaths = ["."]
+venvPath = "."
+venv = ".venv"
