@@ -5,6 +5,7 @@ with source as (
 renamed as (
     select
         event_id,
+        session_id,
         user_id,
         product_id,
         product_name,

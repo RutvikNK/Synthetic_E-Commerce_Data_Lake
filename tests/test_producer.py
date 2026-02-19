@@ -26,9 +26,10 @@ def test_generate_event_structure(producer):
     # Use the first product from your global list for consistency
     test_product = PRODUCTS[0]
     
-    event = producer.generate_event("user_123", "page_view", product=test_product)
+    event = producer.generate_event("user_123", "session_456", "page_view", product=test_product)
     
     assert event["user_id"] == "user_123"
+    assert event["session_id"] == "session_456"
     assert event["event_type"] == "page_view"
     assert "timestamp" in event
     assert "event_id" in event
@@ -44,7 +45,9 @@ def test_simulate_user_journey_purchase_logic(producer):
     with patch("random.choices", return_value=["purchase"]):
         # Force "random.choice" to be False so we skip the Ad Click check for this specific test
         # (Or we can just filter the results)
-        journey = producer.simulate_user_journey()
+        # Also force number of sessions to 1
+        with patch("random.randint", return_value=1):
+            journey = producer.simulate_user_journey()
         
     event_types = [e["event_type"] for e in journey]
     
@@ -55,9 +58,11 @@ def test_simulate_user_journey_purchase_logic(producer):
     
     # 2. Check consistency (same user, same product)
     user_ids = set(e["user_id"] for e in journey)
+    session_ids = set(e["session_id"] for e in journey)
     product_ids = set(e.get("product_id") for e in journey if "product_id" in e)
     
     assert len(user_ids) == 1, "Journey should belong to one unique user"
+    assert len(session_ids) == 1, "Journey should belong to one unique session for this test"
     assert len(product_ids) == 1, "Journey should focus on one specific product"
 
 def test_ad_click_journey(producer):
@@ -76,7 +81,7 @@ def test_poison_pill_injection(producer):
     """Verify that the poison pill logic actually deletes the timestamp."""
     # Force random() to return a number < 0.01 (e.g., 0.001)
     with patch("random.random", return_value=0.001):
-        event = producer.generate_event("bad_user", "page_view")
+        event = producer.generate_event("bad_user", "bad_session", "page_view")
         assert "timestamp" not in event, "Poison pill should remove timestamp"
 
 def test_publish_data(producer):

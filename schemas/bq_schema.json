@@ -12,6 +12,12 @@
     "description": "Type of interaction: ad_click, page_view, add_to_cart, purchase"
   },
   {
+    "name": "session_id",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Unique identifier for the user session"
+  },
+  {
     "name": "user_id",
     "type": "STRING",
     "mode": "NULLABLE",

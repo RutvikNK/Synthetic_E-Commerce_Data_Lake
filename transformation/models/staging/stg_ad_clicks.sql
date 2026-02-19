@@ -5,6 +5,7 @@ with source as (
 renamed as (
     select
         event_id,
+        session_id,
         user_id,
         -- Timestamps always need casting from String to Timestamp
         TIMESTAMP(timestamp) as occurred_at,
